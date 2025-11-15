@@ -5,7 +5,7 @@ document.getElementById("btnRegister").onclick = () => {
   localStorage.setItem("username", username);
   localStorage.setItem("userId", 1); // mock ID
 
-  window.location.href = "../home/home.html";
+  window.location.href = "../home/index.html";
 };
 
 document.getElementById("btnLogin").onclick = () => {
@@ -15,7 +15,7 @@ document.getElementById("btnLogin").onclick = () => {
   localStorage.setItem("username", username);
   localStorage.setItem("userId", 1);
 
-  window.location.href = "../home/home.html";
+  window.location.href = "../home/index.html";
 };
 
 function showMsg(msg) {
