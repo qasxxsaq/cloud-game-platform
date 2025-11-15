@@ -5,7 +5,12 @@ const app = express();
 const PORT = process.env.PORT || 8080; // fallback to 8080
 const HOST = '0.0.0.0';
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/game', require('./routes/game'));
 
 // simple health route
 app.get('/health', (req, res) => res.send('ok'));
