@@ -1,4 +1,5 @@
 const express = require('express');
+const { Pool } = require("pg");
 const path = require('path');
 const app = express();
 
@@ -6,11 +7,15 @@ const PORT = process.env.PORT || 8080; // fallback to 8080
 const HOST = '0.0.0.0';
 
 app.use(express.json());
-
 app.use(express.static(path.join(__dirname, 'frontend')));
 
-// app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/game', require('./routes/game'));
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
 
 // GET / : Root page. Redirect to login
 app.get('/', (req, res) => {
@@ -38,6 +43,70 @@ app.post("/register", async (req, res) => {
     }
 
     res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+app.post("/api/klotski/save", async (req, res) => {
+  const { user_id, board, current_steps } = req.body;
+
+  // Validate input
+  if (!user_id) return res.status(400).json({ error: "user_id required"});
+  if (!board) return res.status(400).json({ error: "board required"});
+  if (typeof current_steps !== "number") return res.status(400).json({ error: "steps must be a number"});
+
+  try{
+    const result = await pool.query(
+      `
+      INSERT INTO klotski_game (user_id, board, current_steps)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (user_id)
+      DO UPDATE SET
+        board = EXCLUDED.board,
+        current_steps = EXCLUDED.current_steps,
+        updated_at = CURRENT_TIMESTAMP
+      RETURNING *;
+    `,
+      [user_id, board, current_steps]
+    );
+
+    res.status(200).json({
+      ok: true,
+      game: result.rows[0],
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+app.post("/api/klotski/load", async (req, res) => {
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: "username required"});
+  
+  try{
+    const user = await pool.query(
+      "SELECT user_id FROM users WHERE username = $1",
+      [username]
+    );
+
+    if (user.rows.length === 0) return res.status(404).json({ error: "User not found" });
+    const user_id = user.rows[0].user_id;
+    const savedResult = await pool.query(
+      "SELECT board, current_steps FROM klotski_game WHERE user_id = $1",
+      [user_id]
+    );
+    if (savedResult.rows.length === 0) return res.json({ exists: false});
+
+    const save = savedResult.rows[0];
+    return res.json({
+      exists: true,
+      board: save.board,
+      current_steps: save.current_steps
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Database error" });
