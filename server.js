@@ -27,28 +27,82 @@ app.get('/', (req, res) => {
 
 // POST /register: Register a new user
 app.post("/register", async (req, res) => {
-  const { username } = req.body;
-  if (!username) return res.status(400).json({ error: "Username required" });
-
   try {
-    // Check if user exists
-    let result = await pool.query("SELECT * FROM users WHERE username=$1", [username]);
-    let user;
-    if (result.rows.length === 0) {
-      // Insert new user
-      result = await pool.query(
-        "INSERT INTO users (username) VALUES ($1) RETURNING *",
-        [username]
-      );
-      user = result.rows[0];
-    } else {
-      user = result.rows[0];
+    const { username, password } = req.body;
+
+    // Validate input
+    if (!username || !password) {
+      return res.status(400).json({ message: "Invalid username or password." });
     }
 
-    res.json(user);
+    // Check if user already exists
+    const existingUser = await pool.query(
+      "SELECT * FROM users WHERE username = $1",
+      [username]
+    );
+    if (existingUser.rows.length > 0) {
+      return res.status(409).json({ message: "Username already taken." });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert user into database
+    const result = await pool.query(
+      "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING user_id, username, created_at",
+      [username, hashedPassword]
+    );
+
+    const newUser = result.rows[0];
+    res.status(201).json({ message: "User registered successfully", user: newUser });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Database error" });
+    res.status(500).json({ message: "Internal server error: register" });
+  }
+});
+
+// POST /login: Login a user. Query database to check the credentials. 
+app.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // Validate input
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required." });
+    }
+
+    // Check if user exists
+    const userResult = await pool.query(
+      "SELECT * FROM users WHERE username = $1",
+      [username]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ message: "Invalid username or password." });
+    }
+
+    const user = userResult.rows[0];
+
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid username or password." });
+    }
+
+    // Optionally update last_login
+    await pool.query(
+      "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE user_id = $1",
+      [user.user_id]
+    );
+
+    // Respond with user info (without password)
+    res.json({
+      message: "Login successful",
+      user: { user_id: user.user_id, username: user.username },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal server error: login" });
   }
 });
 
