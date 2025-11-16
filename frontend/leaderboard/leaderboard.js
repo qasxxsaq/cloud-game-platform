@@ -1,3 +1,6 @@
+const currentUsername = localStorage.getItem("username");
+const from = localStorage.getItem("leaderboardFrom") || "../home/index.html";
+
 // Load leaderboard
 async function leaderBoard() {
     try {
@@ -19,6 +22,9 @@ async function leaderBoard() {
         // For each row in data, create a new table row
         data.forEach((row, index) => {
             const tr = document.createElement("tr");
+            if (row.username === currentUsername) {
+                tr.classList.add("highlight-row");
+            }
             // Fill table
             tr.innerHTML = `
                 <td>${index + 1}</td>
@@ -32,5 +38,9 @@ async function leaderBoard() {
         console.error("Failed to load leaderboard", err);
     } 
 }
+
+document.getElementById("backBtn").onclick = () => {
+    window.location.href = from;
+};
 
 leaderBoard();

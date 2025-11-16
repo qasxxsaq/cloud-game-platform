@@ -22,7 +22,7 @@ h1 {
     color: #000;
 }
 
-a.btn {
+.btn {
     display: inline-block;
     padding: 12px 25px;
     margin: 15px;
@@ -32,9 +32,11 @@ a.btn {
     text-decoration: none;
     border-radius: 8px;
     transition: background 0.15s ease;
+    outline: none;
+    border: none;
 }
 
-a.btn:hover {
+.btn:hover {
     background: #e5e5e5;
     color: #333;
 }

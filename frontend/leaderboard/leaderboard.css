@@ -49,9 +49,17 @@ tr:hover {
     border-radius: 8px;
     text-decoration: none;
     transition: background 0.15s ease;
+    outline: none;
+    border: none;
 }
 
 .back-btn:hover {
     background: #e5e5e5;
     color: #333;
+}
+
+.highlight-row {
+    background-color: #333; 
+    color: white;            
+    font-weight: bold;
 }

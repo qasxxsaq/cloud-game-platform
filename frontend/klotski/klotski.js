@@ -198,6 +198,7 @@ document.getElementById("restartBtn1").onclick = restartGame;
 document.getElementById("restartBtn2").onclick = restartGame;
 document.getElementById("saveBtn").onclick = saveGame;
 document.getElementById("leaderboardBtn").onclick = () => {
+    localStorage.setItem("leaderboardFrom", "../klotski/index.html");
     window.location.href = "../leaderboard/index.html";
 }
 
