@@ -1,3 +1,5 @@
+const cors = require("cors");
+
 const express = require('express');
 const { Pool } = require("pg");
 const path = require('path');
@@ -6,6 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 8080; // fallback to 8080
 const HOST = '0.0.0.0';
 
+app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'frontend')));
 
@@ -99,11 +102,12 @@ app.post("/api/klotski/load", async (req, res) => {
       "SELECT board, current_steps FROM klotski_game WHERE user_id = $1",
       [user_id]
     );
-    if (savedResult.rows.length === 0) return res.json({ exists: false});
+    if (savedResult.rows.length === 0) return res.json({ exists: false, user_id});
 
     const save = savedResult.rows[0];
     return res.json({
       exists: true,
+      user_id: user_id,
       board: save.board,
       current_steps: save.current_steps
     });

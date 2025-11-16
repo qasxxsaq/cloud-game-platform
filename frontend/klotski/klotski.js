@@ -1,4 +1,8 @@
+// Temporary
+localStorage.setItem("username", "tester");
 
+let autoSaveTimer = null;
+let user_id = null;
 // 4x4 board size
 const size = 4;
 let steps = 0;
@@ -6,6 +10,70 @@ let steps = 0;
 let board = [];
 for (let i = 0; i < size * size; i++) {
     board.push(i);
+}
+
+// Load game data from the server
+async function loadGame(){
+    const username = localStorage.getItem("username");
+    // If no username exists, then treat as a first-time user
+    if(!username) {
+        console.warn("No username found");
+        shuffleBoard();
+        render();
+        return;
+    }
+
+    try{
+        // Request saved game data from backend
+        const res = await fetch("http://localhost:8080/api/klotski/load", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({username})
+        });
+
+        const data = await res.json();
+        // If no save data exists, initialize a new game
+        if (!data.exists) {
+            console.log("No save found");
+            user_id = data.user_id;
+            shuffleBoard();
+            steps = 0;
+            render();
+            return;
+        }
+        // Load existing save data
+        user_id = data.user_id;
+        board = data.board.tiles;
+        steps = data.current_steps;
+        render();
+    } catch (err) {
+        console.error("Load failed", err);
+        shuffleBoard();
+        steps = 0;
+        render();
+    }
+}
+
+// Save current game state to the server
+async function saveGame() {
+    try{
+        const username = localStorage.getItem("username");
+        // If user not logged in, skip saving
+        if (!username) return;
+        // Send game state to backend for saving 
+        await fetch("http://localhost:8080/api/klotski/save",{
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user_id: user_id,
+                board: { tiles: board },
+                current_steps: steps
+            })
+        });
+        console.log("Game Saved");
+    } catch (err) {
+        console.error( "Auto save failed", err);
+    }
 }
 
 function shuffleBoard() {
@@ -60,7 +128,13 @@ function tryMove(index) {
         [board[index], board[blank]] = [board[blank], board[index]];
         steps++;
         render();
+        autoSave();
     }
+}
+
+function autoSave() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(saveGame, 1000);
 }
 
 // Board DOM
@@ -95,6 +169,7 @@ function render() {
 
 document.getElementById("restartBtn1").onclick = restartGame;
 document.getElementById("restartBtn2").onclick = restartGame;
+document.getElementById("saveBtn").onclick = saveGame;
 
 function restartGame() {
     shuffleBoard();
@@ -105,6 +180,4 @@ function restartGame() {
 }
 
 // Initialize the game
-shuffleBoard();
-steps = 0;
-render();
+loadGame();
