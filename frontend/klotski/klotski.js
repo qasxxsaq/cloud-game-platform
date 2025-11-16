@@ -14,6 +14,9 @@ for (let i = 0; i < size * size; i++) {
 
 // Load game data from the server
 async function loadGame(){
+    const loading = document.getElementById("loading");
+    loading.style.display = "block";
+
     const username = localStorage.getItem("username");
     // If no username exists, then treat as a first-time user
     if(!username) {
@@ -32,6 +35,7 @@ async function loadGame(){
         });
 
         const data = await res.json();
+        loading.style.display = "none";
         // If no save data exists, initialize a new game
         if (!data.exists) {
             console.log("No save found");
@@ -48,6 +52,7 @@ async function loadGame(){
         render();
     } catch (err) {
         console.error("Load failed", err);
+        loading.style.display = "none";
         shuffleBoard();
         steps = 0;
         render();
@@ -73,6 +78,27 @@ async function saveGame() {
         console.log("Game Saved");
     } catch (err) {
         console.error( "Auto save failed", err);
+    }
+}
+
+// Upload steps to leaderboard
+async function uploadScore(bestSteps) {
+    if (!user_id) {
+        console.error("No user id");
+        return;
+    }
+    try {
+        await fetch("http://localhost:8080/api/klotski/leaderboard/save", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                user_id,
+                best_steps: bestSteps
+            })
+        });
+        console.log("Leaderboard updated!");
+    } catch (err) {
+        console.error("Failed to upload score:", err);
     }
 }
 
@@ -162,6 +188,7 @@ function render() {
         setTimeout(() => {
             document.getElementById("winSteps").innerText = steps;
             document.getElementById("winPopup").classList.add("show");
+            uploadScore(steps);
         }, 200);
     }
     document.getElementById("Counter").innerText = "Steps: " + steps;
@@ -170,6 +197,9 @@ function render() {
 document.getElementById("restartBtn1").onclick = restartGame;
 document.getElementById("restartBtn2").onclick = restartGame;
 document.getElementById("saveBtn").onclick = saveGame;
+document.getElementById("leaderboardBtn").onclick = () => {
+    window.location.href = "../leaderboard/index.html";
+}
 
 function restartGame() {
     shuffleBoard();

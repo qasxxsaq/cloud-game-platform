@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS klotski_game (
 );
 
 CREATE TABLE IF NOT EXISTS klotski_leaderboard (
-    user_id INTEGER REFERENCES users(user_id),
+    user_id INTEGER PRIMARY KEY REFERENCES users(user_id),
     best_steps INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

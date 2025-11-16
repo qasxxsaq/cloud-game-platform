@@ -105,10 +105,29 @@ p {
     pointer-events: auto;
 }
 
-#restartBtn1 {
+#winSteps {
+    font-weight: bold;
+    color: #000;
+}
+
+#loading {
     position: absolute;
-    bottom: -10px;
-    right: -10px;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 26px;
+    color: #555;
+    font-weight: 500;
+}
+
+#saveBtn{
+    position: absolute;
+    top: -60px;
+    right: 10px;
+}
+
+.btn-common {
+    position: absolute;
     padding: 8px 18px;
     font-size: 18px;
     border: 1px solid #bbb;
@@ -117,33 +136,32 @@ p {
     color: white;
     cursor: pointer;
     transition: background 0.15s ease;
+    text-decoration: none; /* 给 .back-btn 用的 */
 }
 
-#restartBtn1:hover {
+.btn-common:hover {
     background: #e5e5e5;
     color: #333;
+}
+
+#restartBtn1 {
+    bottom: -60px;
+    right: -30px;
 }
 
 #restartBtn2 {
-    position: absolute;
     bottom: 10px;
     right: 10px;
     margin-top: 15px;
-    padding: 8px 18px;
-    font-size: 18px;
-    border: 1px solid #bbb;
-    border-radius: 6px;
-    background: #9e9e9e;
-    color: white;
-    cursor: pointer;
 }
 
-#restartBtn2:hover {
-    background: #e5e5e5;
-    color: #333;
+#leaderboardBtn {
+    bottom: -60px;
+    left: 10px;
+    margin-top: 15px;
 }
 
-#winSteps {
-    font-weight: bold;
-    color: #000;
+.back-btn {
+    top: 20px;
+    left: 20px;
 }
