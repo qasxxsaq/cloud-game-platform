@@ -59,7 +59,7 @@ tr:hover {
 }
 
 .highlight-row {
-    background-color: #333; 
-    color: white;            
+    background-color: #333 !important; 
+    color: white !important;            
     font-weight: bold;
 }
