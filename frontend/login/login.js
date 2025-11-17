@@ -1,3 +1,8 @@
+const BASE =
+  location.hostname === "localhost" || location.hostname === "127.0.0.1"
+    ? "http://localhost:8080"
+    : "";
+
 document.getElementById("btnRegister").onclick = async () => {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -5,7 +10,7 @@ document.getElementById("btnRegister").onclick = async () => {
   if (!password) return showMsg("Password required");
 
   try {
-    const res = await fetch("/register", {
+    const res = await fetch(`${BASE}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -14,6 +19,7 @@ document.getElementById("btnRegister").onclick = async () => {
     const data = await res.json();
 
     if (res.ok) {
+      localStorage.setItem("username", username);
       window.location.href = "../home/index.html";
     } else {
       showMsg(data.message);
@@ -31,7 +37,7 @@ document.getElementById("btnLogin").onclick = async() => {
   if (!password) return showMsg("Password required");
 
   try {
-    const res = await fetch("/login", {
+    const res = await fetch(`${BASE}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -40,6 +46,7 @@ document.getElementById("btnLogin").onclick = async() => {
     const data = await res.json();
 
     if (res.ok) {
+      localStorage.setItem("username", username);
       window.location.href = "../home/index.html";
     } else {
       showMsg(data.message);

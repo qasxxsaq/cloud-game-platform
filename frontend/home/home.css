@@ -40,3 +40,26 @@ h1 {
     background: #e5e5e5;
     color: #333;
 }
+
+.btn-common {
+    position: absolute;
+    padding: 8px 18px;
+    font-size: 18px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    background: #9e9e9e;
+    color: white;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    text-decoration: none; /* 给 .back-btn 用的 */
+}
+
+.btn-common:hover {
+    background: #e5e5e5;
+    color: #333;
+}
+
+.back-btn {
+    top: 20px;
+    left: 20px;
+}

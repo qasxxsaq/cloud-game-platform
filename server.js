@@ -1,5 +1,5 @@
 const cors = require("cors");
-
+const bcrypt = require("bcrypt");
 const express = require('express');
 const { Pool } = require("pg");
 const path = require('path');

@@ -1,5 +1,9 @@
-// Temporary
-localStorage.setItem("username", "tester");
+const BASE =
+  location.hostname === "localhost" || location.hostname === "127.0.0.1"
+    ? "http://localhost:8080"
+    : "";
+
+const username = localStorage.getItem("username");
 
 let autoSaveTimer = null;
 let user_id = null;
@@ -17,7 +21,6 @@ async function loadGame(){
     const loading = document.getElementById("loading");
     loading.style.display = "block";
 
-    const username = localStorage.getItem("username");
     // If no username exists, then treat as a first-time user
     if(!username) {
         console.warn("No username found");
@@ -28,7 +31,7 @@ async function loadGame(){
 
     try{
         // Request saved game data from backend
-        const res = await fetch("http://localhost:8080/api/klotski/load", {
+        const res = await fetch(`${BASE}/api/klotski/load`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({username})
@@ -62,11 +65,10 @@ async function loadGame(){
 // Save current game state to the server
 async function saveGame() {
     try{
-        const username = localStorage.getItem("username");
         // If user not logged in, skip saving
         if (!username) return;
         // Send game state to backend for saving 
-        await fetch("http://localhost:8080/api/klotski/save",{
+        await fetch(`${BASE}/api/klotski/save`,{
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -88,7 +90,7 @@ async function uploadScore(bestSteps) {
         return;
     }
     try {
-        await fetch("http://localhost:8080/api/klotski/leaderboard/save", {
+        await fetch(`${BASE}/api/klotski/leaderboard/save`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({

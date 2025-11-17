@@ -1,10 +1,15 @@
-const currentUsername = localStorage.getItem("username");
+const BASE =
+  location.hostname === "localhost" || location.hostname === "127.0.0.1"
+    ? "http://localhost:8080"
+    : "";
+
+const username = localStorage.getItem("username");
 const from = localStorage.getItem("leaderboardFrom") || "../home/index.html";
 
 // Load leaderboard
 async function leaderBoard() {
     try {
-        const res = await fetch("http://localhost:8080/api/klotski/leaderboard");
+        const res = await fetch(`${BASE}/api/klotski/leaderboard`);
         const data = await res.json();
         // Find <tbody> inside the table with id= "leaderboard"
         const tbody = document.querySelector("#leaderboard tbody");
@@ -22,7 +27,7 @@ async function leaderBoard() {
         // For each row in data, create a new table row
         data.forEach((row, index) => {
             const tr = document.createElement("tr");
-            if (row.username === currentUsername) {
+            if (row.username === username) {
                 tr.classList.add("highlight-row");
             }
             // Fill table
