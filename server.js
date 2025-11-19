@@ -4,6 +4,26 @@ const express = require('express');
 const { Pool } = require("pg");
 const path = require('path');
 const app = express();
+const client = require("prom-client");
+
+// Create a Registry to register custom metrics
+const register = new client.Registry();
+// Default metrics (node process metrics)
+client.collectDefaultMetrics({ register });
+// --- Custom Metric: registered user Counter ---
+const registeredUserCounter = new client.Counter({
+  name: "users_registered_total",
+  help: "Total number of users registered",
+  labelNames: ["method", "route", "status"],
+});
+const usersLoggedIn = new client.Counter({
+  name: "users_logged_in_total",
+  help: "Total number of successful user logins",
+  labelNames: ["method", "route", "status"],
+});
+// Register
+register.registerMetric(registeredUserCounter);
+register.registerMetric(usersLoggedIn);
 
 const PORT = process.env.PORT || 8080; // fallback to 8080
 const HOST = '0.0.0.0';
@@ -53,8 +73,21 @@ app.post("/register", async (req, res) => {
       [username, hashedPassword]
     );
 
+    // Increment httpRequestCounter
+    registeredUserCounter.inc({
+      method: req.method,
+      route: "/register",
+      status: 201,
+    });
+
+    console.log(`User (${username}) registered !`);
+    
     const newUser = result.rows[0];
-    res.status(201).json({ message: "User registered successfully", user: newUser });
+    res.status(201).json({ 
+      message: "User registered successfully", 
+      user: newUser
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error: register" });
@@ -95,11 +128,21 @@ app.post("/login", async (req, res) => {
       [user.user_id]
     );
 
+    // Increment usersLoggedIn Counter
+    usersLoggedIn.inc({
+      method: req.method,
+      route: "/login",
+      status: 201,
+    });
+
+    console.log(`User (${username}) logged in !`);
+
     // Respond with user info (without password)
-    res.json({
+    res.status(200).json({
       message: "Login successful",
       user: { user_id: user.user_id, username: user.username },
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error: login" });
@@ -200,6 +243,7 @@ app.get("/api/klotski/leaderboard", async (req, res) =>{
     );
     res.json(result.rows);
   } catch(err) {
+    console.error(err);
     res.status(500).json({ error: "Leaderboard error" });
   }
 });
@@ -242,6 +286,12 @@ app.post("/api/klotski/leaderboard/save", async (req, res) => {
 
 // simple health route
 app.get('/health', (req, res) => res.send('ok'));
+
+// Expose metrics to Prometheus
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", register.contentType);
+  res.end(await register.metrics());
+});
 
 // Return 404 for all other requests
 app.use((req, res) => {
