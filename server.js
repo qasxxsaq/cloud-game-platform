@@ -6,6 +6,11 @@ const path = require('path');
 const app = express();
 const client = require("prom-client");
 
+// For online matches
+const http = require("http").createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(http, { cors: { origin: "*" } });
+
 // Create a Registry to register custom metrics
 const register = new client.Registry();
 // Default metrics (node process metrics)
@@ -293,11 +298,172 @@ app.get("/metrics", async (req, res) => {
   res.end(await register.metrics());
 });
 
+
+// =============================
+//    SIMPLE MATCHMAKING SYSTEM
+// =============================
+let waitingPlayer = null;
+
+function createInitialBoard() {
+  const board = Array(64).fill(null);
+  board[27] = "W";
+  board[28] = "B";
+  board[35] = "B";
+  board[36] = "W";
+  return board;
+}
+
+function computeFlips(board, i, player) {
+  const dirs = [
+    [-1,-1],[-1,0],[-1,1],
+    [0,-1],        [0,1],
+    [1,-1],[1,0],[1,1]
+  ];
+  const opp = player === "B" ? "W" : "B";
+  const r = Math.floor(i / 8);
+  const c = i % 8;
+  const result = [];
+
+  for (const [dr, dc] of dirs) {
+    let rr = r + dr, cc = c + dc;
+    const line = [];
+
+    while (rr >= 0 && rr < 8 && cc >= 0 && cc < 8 &&
+           board[rr*8 + cc] === opp) {
+      line.push(rr*8 + cc);
+      rr += dr; cc += dc;
+    }
+
+    if (line.length &&
+        rr >= 0 && rr < 8 && cc >= 0 && cc < 8 &&
+        board[rr*8 + cc] === player) {
+      result.push(...line);
+    }
+  }
+
+  return result;
+}
+
+// roomId -> game state
+const games = {};
+
+io.on("connection", socket => {
+  console.log("Client connected:", socket.id);
+
+  // ========== Matchmaking ==========
+  if (!waitingPlayer) {
+    waitingPlayer = socket;
+    socket.emit("match_wait");
+    return;
+  }
+
+  // Pair two players
+  const p1 = waitingPlayer;
+  const p2 = socket;
+  waitingPlayer = null;
+
+  const room = `room_${p1.id}_${p2.id}`;
+  p1.join(room);
+  p2.join(room);
+
+  games[room] = {
+    board: createInitialBoard(),
+    current: "B",        // Black starts
+    players: { B: p1.id, W: p2.id }
+  };
+
+  io.to(room).emit("match_start", {
+    room,
+    board: games[room].board,
+    black: p1.id,
+    white: p2.id,
+    current: "B"
+  });
+
+  // ========== Handle moves ==========
+  function handleMove(playerSocket, index) {
+    const game = games[room];
+    if (!game) return;
+
+    const color = game.players.B === playerSocket.id ? "B" : "W";
+    if (color !== game.current) return; // Not your turn
+
+    const board = game.board;
+    if (board[index]) return; // Occupied
+
+    const f = computeFlips(board, index, color);
+    if (f.length === 0) return; // illegal move
+
+    // Apply move
+    board[index] = color;
+    f.forEach(i => board[i] = color);
+
+    // Check next valid moves
+    const nextColor = color === "B" ? "W" : "B";
+
+    if (validMoves(board, nextColor).length === 0) {
+      if (validMoves(board, color).length === 0 || board.every(cell => cell)) {
+        // Game over
+        const bCount = board.filter(x => x === "B").length;
+        const wCount = board.filter(x => x === "W").length;
+        const winner = bCount === wCount ? "Draw" : (bCount > wCount ? "B" : "W");
+
+        io.to(room).emit("game_over", { board, winner });
+        delete games[room];
+        return;
+      } else {
+        // Opponent must pass
+        game.current = color; // same player plays again
+      }
+    } else {
+      game.current = nextColor;
+    }
+
+    io.to(room).emit("board_update", {
+      board: board,
+      current: game.current
+    });
+  }
+
+  function validMoves(board, player) {
+    const moves = [];
+    for (let i = 0; i < board.length; i++) {
+      if (!board[i] && computeFlips(board, i, player).length) {
+        moves.push(i);
+      }
+    }
+    return moves;
+  }
+
+  p1.on("play_move", i => handleMove(p1, i));
+  p2.on("play_move", i => handleMove(p2, i));
+
+  // ========== Handle disconnect ==========
+  const onDC = (playerSocket) => {
+    if (!games[room]) return;
+
+    const winner = (games[room].players.B === playerSocket.id)
+      ? "W"
+      : "B";
+
+    io.to(room).emit("opponent_left", { winner });
+    delete games[room];
+  };
+
+  p1.on("disconnect", () => onDC(p1));
+  p2.on("disconnect", () => onDC(p2));
+});
+// =============================
+// END OF SIMPLE MATCHMAKING SYSTEM
+// =============================
+
+
 // Return 404 for all other requests
 app.use((req, res) => {
   res.status(404).send('Page not found');
 });
 
-app.listen(PORT, HOST, () => {
+http.listen(PORT, HOST, () => {
   console.log(`Server listening on http://${HOST}:${PORT}`);
 });
+
