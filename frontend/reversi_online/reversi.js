@@ -1,8 +1,8 @@
 const boardEl = document.getElementById("board");
 const statusEl = document.getElementById("status");
-const restartBtn = document.getElementById("restart");
+// const restartBtn = document.getElementById("restart");
 
-const socket = io("http://localhost:8080");
+const socket = io(window.location.origin);
 
 socket.on("match_wait", () => {
   statusEl.textContent = "Waiting for an opponent...";
