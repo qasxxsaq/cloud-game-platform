@@ -299,9 +299,9 @@ app.get("/metrics", async (req, res) => {
 });
 
 
-// =============================
-//    SIMPLE MATCHMAKING SYSTEM
-// =============================
+// ==============================
+//   REVERSI MATCHMAKING SYSTEM
+// ==============================
 let waitingPlayer = null;
 
 function createInitialBoard() {
@@ -453,10 +453,110 @@ io.on("connection", socket => {
   p1.on("disconnect", () => onDC(p1));
   p2.on("disconnect", () => onDC(p2));
 });
-// =============================
-// END OF SIMPLE MATCHMAKING SYSTEM
-// =============================
+// =================================
+// END OF REVERSI MATCHMAKING SYSTEM
+// =================================
 
+// ==============================
+//  TICTACTOE MATCHMAKING SYSTEM
+// ==============================
+let waitingTTT = null;
+const tttGames = {}; // roomId → game data
+
+io.on("connection", socket => {
+
+  // --- Matchmaking ---
+  socket.on("ttt_find_match", () => {
+    if (!waitingTTT) {
+      waitingTTT = socket;
+      socket.emit("ttt_wait");
+      return;
+    }
+
+    const p1 = waitingTTT;
+    const p2 = socket;
+    waitingTTT = null;
+
+    const room = `ttt_${p1.id}_${p2.id}`;
+    p1.join(room);
+    p2.join(room);
+
+    tttGames[room] = {
+      board: Array(9).fill(null),
+      current: "X",
+      players: { X: p1.id, O: p2.id },
+    };
+
+    io.to(room).emit("ttt_start", {
+      room,
+      board: tttGames[room].board,
+      current: "X",
+      X: p1.id,
+      O: p2.id,
+    });
+  });
+
+  // --- Moves ---
+  socket.on("ttt_play", ({ room, index }) => {
+    const game = tttGames[room];
+    if (!game) return;
+
+    const board = game.board;
+    if (board[index]) return; // taken
+
+    const player = game.players[game.current];
+    if (socket.id !== player) return; // not your turn
+
+    board[index] = game.current;
+
+    // Check win/ draw
+    const wins = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    const won = wins.some(w => 
+      board[w[0]] && 
+      board[w[0]] === board[w[1]] && 
+      board[w[1]] === board[w[2]]
+    );
+
+    if (won) {
+      io.to(room).emit("ttt_game_over", { board, winner: game.current });
+      delete tttGames[room];
+      return;
+    }
+
+    if (board.every(x => x)) {
+      io.to(room).emit("ttt_game_over", { board, winner: "Draw" });
+      delete tttGames[room];
+      return;
+    }
+
+    game.current = (game.current === "X" ? "O" : "X");
+    io.to(room).emit("ttt_update", {
+      board,
+      current: game.current,
+    });
+  });
+
+  // --- Disconnect ---
+  socket.on("disconnect", () => {
+    for (const room in tttGames) {
+      const g = tttGames[room];
+      if (!g) continue;
+
+      if (g.players.X === socket.id || g.players.O === socket.id) {
+        const winner = g.players.X === socket.id ? "O" : "X";
+        io.to(room).emit("ttt_opponent_left", { winner });
+        delete tttGames[room];
+      }
+    }
+  });
+});
+// ===================================
+// END OF TICTACTOE MATCHMAKING SYSTEM
+// ===================================
 
 // Return 404 for all other requests
 app.use((req, res) => {
