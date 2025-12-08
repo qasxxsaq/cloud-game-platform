@@ -23,13 +23,15 @@ socket.on("ttt_start", data => {
 });
 
 socket.on("ttt_update", data => {
-  updateBoard(data.board);
+  // updateBoard(data.board);
+  board = [...data.board];
   document.getElementById("status").textContent =
     (data.current === mySymbol ? "Your turn" : "Opponent's turn");
 });
 
 socket.on("ttt_game_over", ({ board, winner }) => {
-  updateBoard(board);
+  // updateBoard(board);
+  board = [...data.board];
   document.getElementById("status").textContent =
     winner === "Draw"
       ? "Draw!"
@@ -53,10 +55,10 @@ const lines = [
   [0,4,8],[2,4,6]
 ];
 
-function updateBoard(serverBoard) {
-  board = serverBoard;   // sync
-  render();
-}
+// function updateBoard(serverBoard) {
+//   board = serverBoard;   // sync
+//   render();
+// }
 
 function render() {
   boardEl.innerHTML = '';
