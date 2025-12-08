@@ -2,7 +2,7 @@ const boardEl = document.getElementById('board');
 const statusEl = document.getElementById('status');
 // const restartBtn = document.getElementById('restart');
 
-const socket = io(); // connect to your server
+const socket = io(window.location.origin); // connect to your server
 let room = null;
 let mySymbol = null;
 

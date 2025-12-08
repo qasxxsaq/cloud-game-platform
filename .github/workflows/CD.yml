@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Install Fly CLI
+      # Set up Fly CLI
       - name: Set up Fly.io CLI
         uses: superfly/flyctl-actions/setup-flyctl@v1
 
