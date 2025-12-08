@@ -25,14 +25,12 @@ jobs:
         run: npm install
 
       # Install Fly CLI
-      - name: Install Fly CLI
-        run: |
-          curl -L https://fly.io/install.sh | sh
-          export PATH="$HOME/.fly/bin:$PATH"
+      - name: Set up Fly.io CLI
+        uses: superfly/flyctl-actions/setup-flyctl@v1
 
       # Deploy to Fly.io
       - name: Deploy to Fly.io
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: fly deploy --app ece1779-project-online-gaming-platform
+        run: flyctl deploy --app ece1779-project-online-gaming-platform
 
