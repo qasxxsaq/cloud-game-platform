@@ -16,7 +16,8 @@ socket.on("ttt_start", data => {
   room = data.room;
   mySymbol = (data.X === socket.id ? "X" : "O");
 
-  updateBoard(data.board);
+  // updateBoard(data.board);
+  board = [...data.board];
 
   document.getElementById("status").textContent =
     (data.current === mySymbol ? "Your turn" : "Opponent's turn");
@@ -31,7 +32,7 @@ socket.on("ttt_update", data => {
 
 socket.on("ttt_game_over", ({ board, winner }) => {
   // updateBoard(board);
-  board = [...data.board];
+  board = [...board];
   document.getElementById("status").textContent =
     winner === "Draw"
       ? "Draw!"
