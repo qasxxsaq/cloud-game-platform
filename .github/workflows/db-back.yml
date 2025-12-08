@@ -1,8 +1,10 @@
 name: Database Backup
 
-on:
-  schedule:
-    - cron: "0 3 * * *"   # Runs daily at 03:00 UTC
+on:  
+#   Automated runs disabled currently to save resource, in case we forget to turn it off.
+#   schedule:
+#     # Minute, Hour, Day of Month, Month (*every month), Day of Week (* ignored)
+#     - cron: "0 3 1 * *"    # Runs monthly on the first day at 03:00 UTC. 
   workflow_dispatch:       # allow manual runs
 
 jobs:
