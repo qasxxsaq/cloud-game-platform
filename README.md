@@ -423,18 +423,18 @@ If nothing happens on the register/login page, but the page loads, it’s likely
 | Task | Charles | Yuchen |
 |------|---------|--------|
 | User system (register, login, localStorage) |  | √ |
-| Tic-Tac-Toe game development                |  |  |
+| Tic-Tac-Toe game development                | √ |  |
 | Klotski game development                    |  | √ |
-| Reversi game development                    |  |  |
+| Reversi game development                    | √ |  |
 | Leaderboard system                          |  | √ |
-| Backend API / API integration               |  | √ |
-| Database schema & PostgreSQL integration    |  | √ |
-| Docker Compose configuration                |  | √ |
+| Backend API / API integration               | √ | √ |
+| Database schema & PostgreSQL integration    | √ | √ |
+| Docker Compose configuration                | √ | √ |
 | Docker Swarm deployment                     |  | √ |
-| Fly.io cloud deployment                     |  |  |
-| Monitoring                                  |  |  |
-| Automated database backup                   |  |  |
-| Project documentation                       |  | √ |
+| Fly.io cloud deployment                     | √ |  |
+| Monitoring                                  | √ |  |
+| Automated database backup                   | √ |  |
+| Project documentation                       | √ | √ |
 
 ## Lessons Learned and Concluding Remarks
 Our work shows that even a small online gaming application can greatly benefit from modern cloud technologies. Through the development of this cloud-based online gaming platform, we gained hands-on experience in designing, deploying, containerizing and then maintaining a full-stack cloud-native application. 
