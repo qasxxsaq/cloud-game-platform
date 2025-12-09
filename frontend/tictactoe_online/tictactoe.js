@@ -5,6 +5,7 @@ const statusEl = document.getElementById('status');
 const socket = io(window.location.origin); // connect to your server
 let room = null;
 let mySymbol = null;
+let currentTurn = null;
 
 socket.emit("ttt_find_match");
 
@@ -18,25 +19,31 @@ socket.on("ttt_start", data => {
 
   // updateBoard(data.board);
   board = [...data.board];
+  currentTurn = data.current;
 
   document.getElementById("status").textContent =
     (data.current === mySymbol ? "Your turn" : "Opponent's turn");
+  render();
 });
 
 socket.on("ttt_update", data => {
   // updateBoard(data.board);
   board = [...data.board];
+  currentTurn = data.current;
   document.getElementById("status").textContent =
     (data.current === mySymbol ? "Your turn" : "Opponent's turn");
+  render();
 });
 
 socket.on("ttt_game_over", ({ board, winner }) => {
   // updateBoard(board);
   board = [...board];
+  currentTurn = null;
   document.getElementById("status").textContent =
     winner === "Draw"
       ? "Draw!"
       : (winner === mySymbol ? "You win!" : "You lose!");
+  render();
 });
 
 socket.on("ttt_opponent_left", ({ winner }) => {
@@ -67,7 +74,7 @@ function render() {
     const btn = document.createElement('button');
     btn.className = 'cell';
     btn.textContent = cell || '';
-    btn.disabled = !!cell || (mySymbol !== data.current);
+    btn.disabled = !!cell || (mySymbol !== currentTurn);
     btn.addEventListener("click", () => {
       socket.emit("ttt_play", { room, index: idx });
     });
