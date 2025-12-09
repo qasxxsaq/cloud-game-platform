@@ -521,6 +521,12 @@ io.on("connection", socket => {
       board[w[1]] === board[w[2]]
     );
 
+    game.current = (game.current === "X" ? "O" : "X");
+    io.to(room).emit("ttt_update", {
+      board,
+      current: game.current,
+    });
+    
     if (won) {
       io.to(room).emit("ttt_game_over", { board, winner: game.current });
       delete tttGames[room];
@@ -532,12 +538,6 @@ io.on("connection", socket => {
       delete tttGames[room];
       return;
     }
-
-    game.current = (game.current === "X" ? "O" : "X");
-    io.to(room).emit("ttt_update", {
-      board,
-      current: game.current,
-    });
   });
 
   // --- Disconnect ---
