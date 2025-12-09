@@ -1,0 +1,39 @@
+name: CI/CD - builds, tests, and deployment
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:   # allows manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+    # No test yet.    
+    #   - name: Run tests
+    #     run: npm test
+
+      # Set up Fly CLI
+      - name: Set up Fly.io CLI
+        uses: superfly/flyctl-actions/setup-flyctl@v1
+
+      # Deploy to Fly.io
+      - name: Deploy to Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --app ece1779-project-online-gaming-platform
+
