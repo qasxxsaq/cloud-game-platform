@@ -522,22 +522,22 @@ io.on("connection", socket => {
     );
 
     if (won) {
+      io.to(room).emit("ttt_update", { board, current: game.current });
       io.to(room).emit("ttt_game_over", { board, winner: game.current });
       delete tttGames[room];
       return;
     }
 
     if (board.every(x => x)) {
+      io.to(room).emit("ttt_update", { board, current: game.current });
       io.to(room).emit("ttt_game_over", { board, winner: "Draw" });
       delete tttGames[room];
       return;
     }
 
     game.current = (game.current === "X" ? "O" : "X");
-    io.to(room).emit("ttt_update", {
-      board,
-      current: game.current,
-    });
+    io.to(room).emit("ttt_update", { board, current: game.current });
+
   });
 
   // --- Disconnect ---
