@@ -28,9 +28,134 @@ Another problem is the lack of observability and deployment flexibility in tradi
 ### Conclusion
 To address these challenges and evaluate the potential of cloud-native technologies, this project aims to develop a cloud-native online game platform that leverages cloud technologies to manage game states, persist user data, and analyze performance metrics across sessions. Ultimately, it seeks to explore how cloud-based architecture can enhance the stability, continuity, and maintainability of online gaming platforms.
 
-## Objective
-## Technical Stack
-## Features
+## Objectives
+The objective of this project is to develop a cloud-native gaming platform supporting single-player, offline multiplayer, and online multiplayer modes. A few games are currently supported, and the platform is very flexible for expansion of more games.  
+
+We would like users to be able to register with their own accounts, retrieve their game status when they log in, and compete with other players through live leaderboards or direct online matches. 
+ 
+### Current Games Supported:
+- Single Player: Digital Klotski, Tic Tac Toe, Reverse Chess.  
+- Multiplayer Offline: Tic Tac Toe, Reverse Chess, on a single computer.  
+- Multiplayer Online: Tic Tac Toe, Reverse Chess, for players across the internet.
+
+## Technical Stack - (5 Core + 3 Advanced)
+### Local Development (Core):
+- Docker was used for local testing and development
+- Docker Compose was used to containerize the application. Two separate containers were used, one for the app and one for the database.
+- An additional VSCode live server extension was also used to help with local testing, allowing static pages and dynamic server actions to be tested in local browsers. 
+
+### Orchestration (Core):
+- Docker Swarm Mode was used to manage containerized and multi-host services, providing scalability and fault tolerance. Hosts were used for database, backend game logics, frontend displays, etc.  
+  - The expected product application is relatively small, so Docker Swarm Mode was chosen for its light weight and flexibility. Swarm is also tightly integrated with Docker, and that could simplify the development process for small projects.
+- Local development was conducted through Docker Compose, for easy testing and deployment. Two containers were implemented, the app and the database.  
+
+### Database and Persistent Storage (Core):
+- PostgreSQL was used for game state storage, player profiles, and leaderboards.  
+  - Users are able to register, login with usernames and passwords, resume game state in Single Player and Multiplayer Offline modes, and enter a weekly refreshed leaderboard.
+- In Docker, persistent volumes were mounted on the db directory.
+- On Fly.io, Fly Volumes were applied for persistent storage to ensure data durability.
+  - After a restart of the whole system due to potential maintenance or upgrade, players are still able to retrieve their games. 
+- Database schema includes tables for users, game sessions, and leaderboards.  
+  - e.g. See examples below:
+```
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP
+);
+-- Klotski game table
+CREATE TABLE IF NOT EXISTS klotski_game (
+    user_id INTEGER PRIMARY KEY REFERENCES users(user_id),
+    board JSONB NOT NULL,
+    current_steps INTEGER NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- Klotski leaderboard table
+CREATE TABLE IF NOT EXISTS klotski_leaderboard (
+    user_id INTEGER PRIMARY KEY REFERENCES users(user_id),
+    best_steps INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Deployment Provider (Core):
+- Fly.io was chosen for cloud deployment, leveraging global edge locations to reduce latency for online multiplayer games.
+
+The team wants to focus more on application development and less on managing infrastructures, so fly.io is preferred over DigitalOcean as a PaaS platform. Fly.io also has the advantage to deploy applications across regions worldwide (closer to users), and this is very suitable for online gaming.  
+ 
+### Monitoring and Observability – Grafana based (Core):
+- Basic metrics:
+  - Grafana metrics were set up for CPU, memory, disk usage.
+  - Metrics were also set up for general system health issues, such as HTTP high latencies, or resource usage spikes.
+- Functional metrics:
+  - Customized metrics were set up for user activities, to analyze the platform usage, potentially improve our application. E.g. High registration activity period, high gameplay activity period.
+  - Customized event logging was set up for player actions, such as new registrations and new logins.
+  - Logs were also set up for alerts in all metrics mentioned above.
+ 
+### Real-Time Functionality (Advanced):  
+- WebSocket-based updates are applied for multiplayer online games to ensure smooth and synchronized gameplay.
+- Players can compete with others on the Internet for some of the supported games. 
+  - Game board is updated in real time.
+### CI/CD pipeline (Advanced):
+- GitHub actions for CI/CD pipeline was implemented.
+- Builds and tests are automatically run for every git push and pull request.
+- Automatic deployment to Flyio is done after all tests have passed.
+- Manual start option is enabled for all actions.
+### Backup and Recovery (Advanced):  
+- Monthly snapshots of PostgreSQL database are taken automatically to prevent data loss.
+- GitHub action pipeline is set up for this automated process. 
+- The data gets stored in AWS S3 storage.
+
+### Backend:
+- Node.js
+### Frontend
+- HTML, Javascript, and CSS
+
+
+## Application Features and Fulfillment of Course Requirements:
+
+Here is a summary of features which are compliant with course requirements. In total, there are 8 features (5 core features + 3 advanced features) implemented. 
+
+- User registration/login, persistent game status, and live leaderboard:
+  - Achieved using PostgreSQL and Fly Volumes.
+  - Ensures consistent game experience. 
+  - Fulfilled Core Technical Requirement 2: State Management.
+- Online matches: users can compete with other players on the internet. 
+  - Achieved using WebSocket. 
+  - A key feature to make the games fun to play. Fulfills our entertaining purpose. 
+  - Fulfilled Advanced Feature Requirement 1: Real-time functionality.
+- Automated database backup:
+  - Achieved using GitHub Action and AWS S3.
+  - Protects users from game data loss or account loss.
+  - Fulfilled Advanced Feature Requirement 2: Backup and recovery.
+- GitHub Actions for automated builds, tests, deployments, and backups: 
+  - Makes the development process efficient. 
+  - Fulfilled Advanced Feature Requirement 3: CI/CD pipeline.
+- Local testing and development: separate containerization of the app and the database.
+  - Makes the app, the database and local testings portable. 
+  - Achieved using Docker and Docker Compose, and additionally a VSCode live server extension.
+  - Fulfilled Core Technical Requirement 1: Containerization and Local Development.
+- Orchestration of multiple replicas:
+  - Achieved using Docker Swarm Mode.
+  - Enables load distribution, and ensures platform availability to the users.
+  - Fulfilled Core Technical Requirement 4: Orchestration Approach.
+- App deployment: 
+  - Used Fly.io. 
+  - Makes the app accessible to users across the Internet. This is another key of cloud computing for online gaming platform. 
+  - Fulfilled Core Technical Requirement 3: Deployment Provider
+- Metrics and alerts for system health, and event loggings for user activities:
+  - Achieved through integrated and customized metrics and logs in Grafana, accessible from both the Grafana user interface and API endpoints from our app.
+  - Enhances development process safety for developers.
+  - Fulfilled Core Technical Requirement 5: Monitoring and Observability
+
+The application also has a fully functional frontend, and every game has its own game logics implemented. These are all implicitly included in the features mentioned above.
+
+These features deliver a practical gaming experience, and are aligned with the course’s objective for cloud-based application development.
+
+
 ## User Guide
 This section describes how users interact with our cloud-based online gaming platform. 
 ### System Overview
@@ -75,18 +200,50 @@ Before running the project locally, the following software must be installed: Do
   
 There are three services: Backend, Frontend and PostgreSQL database. All services are defined and managed through Docker Containers.
 
+### Project File Structure
+The project is mainly seperated as frontend, backend, deployment, and configuration files. The main files and folders are described as follows:
+```text
+.
+├── frontend/                      # Frontend web application source code
+│   ├── home/                      # Home page
+│   ├── klotski/                   # Digital Klotski game page
+│   ├── leaderboard/               # Leaderboard page
+│   ├── login/                     # Login and user authentication page
+│   ├── reversi/                   # General Reversi game page
+│   ├── reversi_online/            # Online multiplayer Reversi game page
+│   ├── reversi_single/            # Single-player Reversi game page
+│   ├── tictactoe/                 # Tic-Tac-Toe game page
+│   └── tictactoe_online/          # Online multiplayer Tic-Tac-Toe game page
+│
+├── screenshots/                   # Screenshots used for report
+│
+├── .gitignore                     # Git ignore configuration
+├── Dockerfile                     # Docker image build file for backend
+├── README.md                      # Project documentation
+├── compose.yaml                   # Docker Compose configuration file
+├── docker-stack.yaml              # Docker Swarm deployment configuration file
+├── init.sql                       # PostgreSQL database initialization script
+├── package.json                   # Project configuration and dependencies
+└── package-lock.json              # Locked dependencies
+```
+
 ### Local Development Setup Using Docker Compose
 The following are the steps for setting up Docker Compose:
-1. Run the docker compose command in the root directory which automatically build the frontend, backend and PostgreSQL database:
+1. Clone the repository: 
+```bash
+git clone https://github.com/qasxxsaq/1779project.git
+cd 1779project
+```
+2. Run the docker compose command in the root directory which automatically build the frontend, backend and PostgreSQL database:
 ```bash
 docker compose up --build
 ```
-2. The PostgreSQL database runs inside a Docker container and uses Docker volumes to enable persistent storage. To inspect the database container, following command is used:
+3. The PostgreSQL database runs inside a Docker container and uses Docker volumes to enable persistent storage. To inspect the database container, following command is used:
 ```bash
 docker ps # to get the database container ID
 docker exec -it <db_container_id> psql -U postgres -d game
 ```
-3. To test the database, we run the following command to check that we have three tables:
+4. To test the database, we run the following command to check that we have three tables:
 ```bash
 \dt
 ```
@@ -98,7 +255,7 @@ SELECT * FROM klotski_leaderboard;
 ```
 > Note that there is no data the first time you run it. 
 
-4. The backend API can be tested locally using web browser, postman or cURL.
+5. The backend API can be tested locally using web browser, postman or cURL.
 Here are examples for all seven API we built:
 - **POST /register:**
 
@@ -223,16 +380,17 @@ MacOS/Linux:
 curl http://localhost:8080/health
 ```
 
-5. The frontend web application can be accessed via the following web url:
+6. The frontend web application can be accessed locally via the following web url:
 [http://localhost:8080/](http://localhost:8080/)
 
 > Users can directly test registration, login, game plays, save/load feature and leaderboard updates. All frontend interactions communicate with the backend through REST APIs.
 
-To stop all running containers we need to run: 
+7. To stop all running containers we need to run: 
 ```bash
 docker compose down
 docker compose down -v # if to remove all containers and volumes
 ```
+
 ### Deployment Using Docker Swarm
 The following are the steps for setting up Docker Swarm which is used with the docker-stack.yaml file:
 1. If the node is already part of a swarm, reset it with:
