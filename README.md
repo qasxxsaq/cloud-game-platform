@@ -200,18 +200,50 @@ Before running the project locally, the following software must be installed: Do
   
 There are three services: Backend, Frontend and PostgreSQL database. All services are defined and managed through Docker Containers.
 
+### Project File Structure
+The project is mainly seperated as frontend, backend, deployment, and configuration files. The main files and folders are described as follows:
+```text
+.
+├── frontend/                      # Frontend web application source code
+│   ├── home/                      # Home page
+│   ├── klotski/                   # Digital Klotski game page
+│   ├── leaderboard/               # Leaderboard page
+│   ├── login/                     # Login and user authentication page
+│   ├── reversi/                   # General Reversi game page
+│   ├── reversi_online/            # Online multiplayer Reversi game page
+│   ├── reversi_single/            # Single-player Reversi game page
+│   ├── tictactoe/                 # Tic-Tac-Toe game page
+│   └── tictactoe_online/          # Online multiplayer Tic-Tac-Toe game page
+│
+├── screenshots/                   # Screenshots used for report
+│
+├── .gitignore                     # Git ignore configuration
+├── Dockerfile                     # Docker image build file for backend
+├── README.md                      # Project documentation
+├── compose.yaml                   # Docker Compose configuration file
+├── docker-stack.yaml              # Docker Swarm deployment configuration file
+├── init.sql                       # PostgreSQL database initialization script
+├── package.json                   # Project configuration and dependencies
+└── package-lock.json              # Locked dependencies
+```
+
 ### Local Development Setup Using Docker Compose
 The following are the steps for setting up Docker Compose:
-1. Run the docker compose command in the root directory which automatically build the frontend, backend and PostgreSQL database:
+1. Clone the repository: 
+```bash
+git clone https://github.com/qasxxsaq/1779project.git
+cd 1779project
+```
+2. Run the docker compose command in the root directory which automatically build the frontend, backend and PostgreSQL database:
 ```bash
 docker compose up --build
 ```
-2. The PostgreSQL database runs inside a Docker container and uses Docker volumes to enable persistent storage. To inspect the database container, following command is used:
+3. The PostgreSQL database runs inside a Docker container and uses Docker volumes to enable persistent storage. To inspect the database container, following command is used:
 ```bash
 docker ps # to get the database container ID
 docker exec -it <db_container_id> psql -U postgres -d game
 ```
-3. To test the database, we run the following command to check that we have three tables:
+4. To test the database, we run the following command to check that we have three tables:
 ```bash
 \dt
 ```
@@ -223,7 +255,7 @@ SELECT * FROM klotski_leaderboard;
 ```
 > Note that there is no data the first time you run it. 
 
-4. The backend API can be tested locally using web browser, postman or cURL.
+5. The backend API can be tested locally using web browser, postman or cURL.
 Here are examples for all seven API we built:
 - **POST /register:**
 
@@ -348,16 +380,17 @@ MacOS/Linux:
 curl http://localhost:8080/health
 ```
 
-5. The frontend web application can be accessed via the following web url:
+6. The frontend web application can be accessed locally via the following web url:
 [http://localhost:8080/](http://localhost:8080/)
 
 > Users can directly test registration, login, game plays, save/load feature and leaderboard updates. All frontend interactions communicate with the backend through REST APIs.
 
-To stop all running containers we need to run: 
+7. To stop all running containers we need to run: 
 ```bash
 docker compose down
 docker compose down -v # if to remove all containers and volumes
 ```
+
 ### Deployment Using Docker Swarm
 The following are the steps for setting up Docker Swarm which is used with the docker-stack.yaml file:
 1. If the node is already part of a swarm, reset it with:
