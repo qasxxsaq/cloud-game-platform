@@ -38,12 +38,13 @@ socket.on("ttt_update", data => {
 socket.on("ttt_game_over", ({ board, winner }) => {
   // updateBoard(board);
   board = [...board];
+  render(); // Have to render before setting currentTurn to null.
   currentTurn = null;
+
   document.getElementById("status").textContent =
     winner === "Draw"
       ? "Draw!"
       : (winner === mySymbol ? "You win!" : "You lose!");
-  render();
 });
 
 socket.on("ttt_opponent_left", ({ winner }) => {
