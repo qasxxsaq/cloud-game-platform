@@ -74,7 +74,7 @@ function render() {
     const btn = document.createElement('button');
     btn.className = 'cell';
     btn.textContent = cell || '';
-    btn.disabled = !!cell || (mySymbol !== currentTurn);
+    btn.disabled = !!cell;
     btn.addEventListener("click", () => {
       socket.emit("ttt_play", { room, index: idx });
     });
