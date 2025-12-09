@@ -168,26 +168,27 @@ Our platform mainly consists of the following parts:
 - Online leaderboard system
 
 ### User Authentication
-![login_page](screenshots/login_page.jpg)
 On the frontend page, there are two buttons which are used to login or register. During the registration process, the new user is required to input a valid username and password and clicks the register button. These credentials are then sent to the backend through the POST /register API in the request body. Once registration is successful, the user is automatically redirected to the main page.  
-
+![login_page](screenshots/login_page.jpg)
 For returning users, login is performed by entering a valid username and password and submitting them through the POST /login API. Then the user will be redirected to the main page. All the user data will be stored persistently in the backend database. 
 
 ### Games supported
 After login, users enter the Home page from which they can access the three games and the leaderboard system.
 ![home_page](screenshots/home_page.jpg)
 
-Tic-tac-toe provides an interactive game board where the users take turns to play locally by clicking on grid cells to place their moves. The system automatically checks and displays game results such as win, loss, or draw in real time. 
+Tic-tac-toe provides an interactive game board where the users take turns to play locally or remotely by clicking on grid cells to place their moves. The system automatically checks and displays game results such as win, loss, or draw in real time. 
 ![tic_tac_toe_page](screenshots/tic_tac_toe_page.jpg)
-When the user selects the Reversi game, the game board is displayed and users can either play in local two-player mode or online multiplayer mode, depending on system configuration. The player can click the play online button to wait for the other player to join in order to play.
+
+When the user selects the Reversi game, the game board is displayed and users can choose to play in local two-player mode, online multi-player mode with another user, or online single-player mode with an AI opponent. For online multi-player mode, the player can click the play online button to wait for the other player to join in order to play.
 ![reversi_page](screenshots/reversi_page.jpg)
+
 Digital Klotski is a puzzle-based game that allows users to move blocks strategically to make all digits in order. 
-![klotski_page](screenshots/klotski_page.jpg)
 While playing Digital Klotskim, users are able to save their current game state at any time by clicking the save button on the interface.The frontend sends the user ID, the current board configuration, and the number of steps taken to the backend through the POST /api/klotski/save API in the request body. When the user refreshes the page, or wants to continue the game after relogin, the saved data can be retrieved using the POST /api/klotski/load API. 
+![klotski_page](screenshots/klotski_page.jpg)
 
 ###  Leaderboard
-![leaderboard_page](screenshots/leaderboard_page.jpg)
 The leaderboard feature allows users to view the top 10 best Klotski game scores across the platform. When a user clicks the leaderboard button from the main page or Klotski page, the frontend retrieves the ranking data by calling the GET /api/klotski/leaderboard API. Then, the leaderboard will load each player’s username, best step count, and the time when the record was created. 
+![leaderboard_page](screenshots/leaderboard_page.jpg)
 
 Every time a user completes a Digital Klotski game, the result can be submitted to the leaderboard using the POST /api/klotski/leaderboard/save API. The user_id and achieved best_steps will be sent to the backend. The system will compare new results with old rankings and only update the record if the new step count is smaller than the existing one, ensuring that only a user’s best performance is preserved. 
 
