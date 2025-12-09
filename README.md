@@ -1,4 +1,4 @@
-# ECE1779 Project
+# Cloud Game Platform - ECE1779 Project
 ## Team Information
 Zhiqi(Charles) Yu 1006718358
 charlesyuzq.yu@mail.utoronto.ca
