@@ -7,6 +7,10 @@ Yuchen Zoe 1006708779
 yuchenzoe.xu@mail.utoronto.ca
 
 
+## Video Demo
+[Demo Video](https://drive.google.com/file/d/1oMq2FgVQEmo6_PmyznG9GDobE1Iv-O_d/view?usp=sharing)
+
+
 ## Motivation
 ### Background
 Web-based games have long been a popular form of entertainment as they are easy to access, simple to play, and compatible with most devices. Their straightforward structure also makes them valuable for studying how interactive applications manage state and handle user actions in real time. 
