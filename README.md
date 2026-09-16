@@ -229,7 +229,8 @@ The project is mainly seperated as frontend, backend, deployment, and configurat
 ├── docker-stack.yaml              # Docker Swarm deployment configuration file
 ├── init.sql                       # PostgreSQL database initialization script
 ├── package.json                   # Project configuration and dependencies
-└── package-lock.json              # Locked dependencies
+├── package-lock.json              # Locked dependencies
+└── server.js                      # Backend server source code
 ```
 
 ### Local Development Setup Using Docker Compose
