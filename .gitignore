@@ -1,1 +1,4 @@
+.gitignore
 node_modules/
+postgres_secret.txt
+flyio_api_token.txt
