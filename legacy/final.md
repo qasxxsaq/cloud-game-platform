@@ -1,9 +1,9 @@
-# Cloud Game Platform  
+# Cloud Game Platform - ECE1779 Project
 ## Team Information
-Zhiqi(Charles) Yu 
+Zhiqi(Charles) Yu 1006718358
 charlesyuzq.yu@mail.utoronto.ca
 
-Yuchen Zoe 
+Yuchen Zoe 1006708779
 yuchenzoe.xu@mail.utoronto.ca
 
 
@@ -119,9 +119,9 @@ The team wants to focus more on application development and less on managing inf
 - HTML, Javascript, and CSS
 
 
-## Application Features:
+## Application Features and Fulfillment of Course Requirements:
 
-Here is a summary of the features. In total, there are 8 features (5 core features + 3 advanced features) implemented. 
+Here is a summary of features which are compliant with course requirements. In total, there are 8 features (5 core features + 3 advanced features) implemented. 
 
 - User registration/login, persistent game status, and live leaderboard:
   - Achieved using PostgreSQL and Fly Volumes.
